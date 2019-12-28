@@ -1,0 +1,74 @@
+<head>
+    <link href="https://stackpath.bootstrapcdn.com/bootswatch/4.4.1/superhero/bootstrap.min.css" rel="stylesheet" integrity="sha384-R/oa7KS0iDoHwdh4Gyl3/fU7pgvSCt7oyuQ79pkw+e+bMWD9dzJJa+Zqd+XJS0AD" crossorigin="anonymous">  </head>
+    <style>
+        body {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            margin-top: -250px;
+            margin-left: -145px;
+            background-image: url(authTheme.png);
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-size: cover;
+        }
+    </style>
+</head>
+<body>
+<b>Create your account</b><pre></pre>
+<script>
+    window.addEventListener('keyup', function (event) {
+        if (event.key === "Enter") {
+            create();
+        }
+    });
+    let create = function () {
+        let pass1 = document.getElementById("exampleInputPassword1").value;
+        let pass2 = document.getElementById("exampleInputPassword2").value;
+        let user = document.getElementById("exampleInputEmail1").value;
+        let num = document.getElementById("exampleInputNumber").value;
+        if (pass1 == "" || pass2 == "" || user == "" || num =="") {
+            alert("All fields must be filled");
+        } else if (pass1 !== pass2) {
+            alert("Not equal passwords");
+        } else {
+            let promise = new Promise(function (resolve, reject) {
+                let xmlRequest = new XMLHttpRequest();
+                xmlRequest.open("POST", 'commandsAllocator/createUser');
+                xmlRequest.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
+                xmlRequest.send(JSON.stringify({
+                    'user': document.getElementById('exampleInputEmail1').value,
+                    'pass': document.getElementById('exampleInputPassword1').value,
+                    'number': document.getElementById('exampleInputNumber').value
+                }));
+                xmlRequest.onload = function () {
+                    if (this.status === 200) {
+                        window.location.href = "authPage.html";
+                    } else {
+                        alert('Ops, something wrong.');
+                    }
+                };
+            });
+            promise.then(() => console.log('ok'), () => alert('bad'));
+        }
+    }
+</script>
+    <div class="form-group">
+        <label for="exampleInputEmail1">User</label>
+        <input type="text" name="email" class="form-control" id="exampleInputEmail1" placeholder="Unique name">
+    </div>
+    <div class="form-group">
+        <label for="exampleInputPassword1">Password</label>
+        <input type="password" name="password" class="form-control" id="exampleInputPassword1" placeholder="Password">
+    </div>
+    <div class="form-group">
+        <label for="exampleInputPassword1">Confirm your password</label>
+        <input type="password" name="confirm" class="form-control" id="exampleInputPassword2" placeholder="Confirm">
+    </div>
+    <div class="form-group">
+        <label for="exampleInputPassword1">Phone number</label>
+        <input type="phone-number" name="confirm" class="form-control" id="exampleInputNumber" placeholder="+7 . . .">
+    </div>
+    <input type="submit" class="btn btn-secondary" value="Submit" onclick="create();">
+    <a href="authPage.html" style="padding-left: 140px">go back</a>
+</body>

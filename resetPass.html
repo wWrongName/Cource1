@@ -1,0 +1,54 @@
+<head>
+    <link href="https://stackpath.bootstrapcdn.com/bootswatch/4.4.1/superhero/bootstrap.min.css" rel="stylesheet" integrity="sha384-R/oa7KS0iDoHwdh4Gyl3/fU7pgvSCt7oyuQ79pkw+e+bMWD9dzJJa+Zqd+XJS0AD" crossorigin="anonymous">  </head>
+<style>
+    body {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        margin-top: -170px;
+        margin-left: -105px;
+        background-image: url(authTheme.png);
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        background-size: cover;
+    }
+</style>
+</head>
+<body>
+<b>Reset password</b><pre></pre>
+<script>
+    let reset = function () {
+        let promise = new Promise(function (resolve, reject) {
+            let r = document.getElementById("customRadio1");
+            console.log(r.checked);
+            let xmlRequest = new XMLHttpRequest();
+            xmlRequest.open("PUT", 'commandsAllocator/resetPassword');
+            xmlRequest.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
+            xmlRequest.send(JSON.stringify({
+                'user': document.getElementById('exampleInputEmail1').value,
+                'way': r.checked == true ? "telegram" : "sms",
+            }));
+            xmlRequest.onload = function() {
+                if (this.status === 200){
+                    window.location.href = "newPass.php?user=" + document.getElementById('exampleInputEmail1').value;
+                } else {
+                    alert('Ops, something wrong.');
+                }
+            };
+        });
+    }
+</script>
+<div class="form-group">
+    <label for="exampleInputEmail1">User</label>
+    <input type="text" name="email" class="form-control" id="exampleInputEmail1" placeholder="Name">
+</div>
+<div class="custom-control custom-radio">
+    <input type="radio" id="customRadio1" name="customRadio" class="custom-control-input" checked="">
+    <label class="custom-control-label" for="customRadio1">telegram</label>
+</div>
+<div class="custom-control custom-radio">
+    <input type="radio" id="customRadio2" name="customRadio" class="custom-control-input">
+    <label class="custom-control-label" for="customRadio2">phone number</label>
+</div>
+<input id="form" type="submit" class="btn btn-secondary" value="reset" onclick="reset();">
+</body>
