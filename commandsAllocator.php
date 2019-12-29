@@ -327,7 +327,7 @@ function giveUsers($users) {
                         echo $structList->users[$j]->code;
                         $req = curl_init();
                         curl_setopt_array($req, [
-                                CURLOPT_URL => 'https://smsc.ru/sys/send.php?login=1amJ0hn&psw=cfhfq2005&phones='.$phone.'&mes='.$structList->users[$j]->code,
+                                CURLOPT_URL => 'https://smsc.ru/sys/send.php?login=&psw=&phones='.$phone.'&mes='.$structList->users[$j]->code,
                                 CURLOPT_POST => true,
                                 CURLOPT_RETURNTRANSFER => true
                             ]
