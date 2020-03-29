@@ -45,11 +45,10 @@
                     if (this.status === 200) {
                         window.location.href = "authPage.html";
                     } else {
-                        alert('Ops, something wrong.');
+                        alert('That name already exits');
                     }
                 };
             });
-            promise.then(() => console.log('ok'), () => alert('bad'));
         }
     }
 </script>

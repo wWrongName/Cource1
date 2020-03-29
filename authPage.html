@@ -36,11 +36,10 @@
                 if (this.status === 200){
                     window.location.href = 'accountPage?user=' + document.getElementById('exampleInputEmail1').value;
                 } else {
-                    alert('Ops, something wrong.');
+                    alert('Wrong name or/and password');
                 }
             };
         });
-        promise.then(() => console.log('auth ok'), () => alert('auth bad'));
     }
 </script>
     <div class="form-group">

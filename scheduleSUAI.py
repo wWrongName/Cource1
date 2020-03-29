@@ -244,7 +244,7 @@ def get_text_messages(message):
 - преподаватель Жиданов К.А.\n\
 - где пара?\n\
 - расписание на понедельник\n\
-- вход user pass")
+- Вход user pass")
 #----------------------------------------------------------------------------------------------------------------------------|
     elif message.text.lower().find('группа') == 0:
         group = message.text.split(' ')
@@ -291,7 +291,7 @@ def get_text_messages(message):
                 bot.send_message(message.from_user.id, "Неверный запрос. Проверьте правильность введённых данных.")
         else:
             bot.send_message(message.from_user.id, "Неверный запрос. Проверьте правильность введённых данных.")
-    elif message.text.lower().find('вход') == 0:
+    elif message.text.find('Вход') == 0:
         clst = message.text.split(' ')
         if len(clst) >= 3:
             I = 0

@@ -24,22 +24,19 @@ class Message {
         $this->listener = $l;
         $this->talkers = [array(
             "talker" => $t,
-            "msgs" => [$msg]
+            "msgs" => ['('.$msg.')']
         )];
     }
 }
 class Note {
     public $user;
     public $deals;
-    public function __construct($usr, $t, $txt, $d, $m, $y) {
+    public function __construct($usr, $t, $txt, $d) {
         $this->user = $usr;
         $this->deals =[array(
             "title" => $t,
             "text" => $txt,
-            "day" => $d,
-            "month" => $m,
-            "year" => $y,
-            "status" => 0
+            "data" => $d
         )];
     }
 }
@@ -50,18 +47,8 @@ function checkNote ($deal, $category, $data) {
             return true;
         else
             return false;
-    } else if ($category == 'day') {
-        if ($deal->day == $data)
-            return true;
-        else
-            return false;
-    } else if ($category == 'month') {
-        if ($deal->month == $data)
-            return true;
-        else
-            return false;
-    } else if ($category == 'year') {
-        if ($deal->year == $data)
+    } else if ($category == 'data') {
+        if ($deal->data == $data)
             return true;
         else
             return false;
@@ -165,7 +152,11 @@ function giveUsers($users) {
                         $userPlace = $i;
                 }
                 if ($userPlace != -1) {
+                    $j = findMessage($structList->messages, $structList->users[$userPlace]->user);
+                    $i = findNote($structList->notes, $structList->users[$userPlace]->user);
                     array_splice($structList->users, $userPlace, 1);
+                    array_splice($structList->notes, $i, 1);
+                    array_splice($structList->messages, $j, 1);
                     http_response_code(200);
                 } else {
                     http_response_code(403);
@@ -241,7 +232,7 @@ function giveUsers($users) {
                     http_response_code(401);
                 }
             } else if ($vars[$uriOpNameLocation] == "createUser") {
-                $userLocation = userExists($reqData->users, $structList->users);
+                $userLocation = userExists($reqData->user, $structList->users);
                 if ($userLocation + 1) {
                     http_response_code(501);
                 } else {
@@ -263,14 +254,11 @@ function giveUsers($users) {
                         $newDeal = array(
                             "title" => $reqData->title,
                             "text" => $reqData->text,
-                            "day" => date('d'),
-                            "month" => date('m'),
-                            "year" => date('Y'),
-                            "status" => 0
+                            "data" => date("d.m.y")
                         );
                         array_push($structList->notes[$j]->deals, $newDeal);
                     } else {
-                        array_push($structList->notes, new Note($structList->users[$userPlace]->user, $reqData->title, $reqData->text, date('d'), date('d'), date('Y')));
+                        array_push($structList->notes, new Note($structList->users[$userPlace]->user, $reqData->title, $reqData->text, date("d.m.y")));
                     }
                     http_response_code(200);
                 } else {
@@ -289,12 +277,12 @@ function giveUsers($users) {
                         if ($j != -1) {
                             $i = findTalker($structList->messages[$j]->talkers, $structList->users[$userPlace]->user);
                             if ($i != -1) {
-                                array_push($structList->messages[$j]->talkers[$i]->msgs, $reqData->text);
+                                array_push($structList->messages[$j]->talkers[$i]->msgs, '('.$reqData->text.')');
                                 http_response_code(200);
                             } else {
                                 $talker = array(
                                     "talker" => $structList->users[$userPlace]->user,
-                                    "msgs" => [$reqData->text]
+                                    "msgs" => ['('.$reqData->text.')']
                                 );
                                 array_push($structList->messages[$j]->talkers, $talker);
                                 http_response_code(200);
@@ -327,7 +315,7 @@ function giveUsers($users) {
                         echo $structList->users[$j]->code;
                         $req = curl_init();
                         curl_setopt_array($req, [
-                                CURLOPT_URL => 'https://smsc.ru/sys/send.php?login=&psw=&phones='.$phone.'&mes='.$structList->users[$j]->code,
+                                CURLOPT_URL => 'https://smsc.ru/sys/send.php?login=1amJ0hn&psw=cfhfq2005&phones='.$phone.'&mes='.$structList->users[$j]->code,
                                 CURLOPT_POST => true,
                                 CURLOPT_RETURNTRANSFER => true
                             ]
@@ -350,7 +338,7 @@ function giveUsers($users) {
                                     CURLOPT_RETURNTRANSFER => true,
                                     CURLOPT_TIMEOUT => 10,
                                     CURLOPT_POSTFIELDS => array(
-                                        'chat_id' => '840018001',
+                                        'chat_id' => $id,
                                         'text' => "Код сброса: " . $structList->users[$j]->code
                                     ),
                                     CURLOPT_PROXY => '51.158.123.35:8811',
@@ -436,8 +424,27 @@ function giveUsers($users) {
                  } else {
                     http_response_code(403);
                  }
+            } else if ($vars[$uriOpNameLocation] == "getUser") {
+                $inside = false;
+                $token = $vars[$uriOpNameLocation + 1];
+                for ($i = 0; $i < count($structList->users); $i++) {
+                    $j = findToken($structList->users[$i], $token);
+                    if ($j != -1) {
+                        $inside = true;
+                    }
+                }
+                if ($inside) {
+                    $i = userExists($vars[$uriOpNameLocation + 2], $structList->users);
+                    if ($i != -1) {
+                        print(json_encode($structList->users[$i]));
+                        http_response_code(200);
+                    }
+                } else {
+                    http_response_code(403);
+                }
             } else if ($vars[$uriOpNameLocation] == "getNote") {
                 $userPlace = -1;
+                $vars[$uriOpNameLocation+3] = str_replace('%20', ' ', $vars[$uriOpNameLocation+3]);
                 $token = $vars[$uriOpNameLocation + 1];
                 for ($i = 0; $i < count($structList->users); $i++) {
                     $tokenPlace = findToken($structList->users[$i], $token);
@@ -448,14 +455,17 @@ function giveUsers($users) {
                     $flag = false;
                     $i = findNote($structList->notes, $structList->users[$userPlace]->user);
                     for ($j = 0; $j < count($structList->notes[$i]->deals); $j++) {
-                        if (checkNote($structList->notes[$i]->deals[$j], $vars[$uriOpNameLocation+2], $vars[$uriOpNameLocation+3]) - 1) {
+                        if (checkNote($structList->notes[$i]->deals[$j], $vars[$uriOpNameLocation+2], $vars[$uriOpNameLocation+3])) {
                             header('Content-Type: application/json');
-                            print(json_encode('{"text":"'.$structList->notes[$i]->deals[$j]->text.'"}'));
+                            print(json_encode(array("text" => $structList->notes[$i]->deals[$j]->text)));
                             $flag = true;
+                            break 1;
                         }
                     }
                     if (!$flag)
                         http_response_code(403);
+                    else
+                        http_response_code(200);
                 } else {
                     http_response_code(403);
                 }
@@ -472,6 +482,22 @@ function giveUsers($users) {
                     $msgs = $structList->messages[$i]->talkers;
                     header('Content-Type: application/json');
                     print(json_encode($msgs));
+                } else {
+                    http_response_code(403);
+                }
+            } else if ($vars[$uriOpNameLocation] == "getNotes") {
+                $userPlace = -1;
+                $token = $vars[$uriOpNameLocation + 1];
+                for ($i = 0; $i < count($structList->users); $i++) {
+                    $tokenPlace = findToken($structList->users[$i], $token);
+                    if ($tokenPlace != -1)
+                        $userPlace = $i;
+                }
+                $i = findNote($structList->notes, $structList->users[$userPlace]->user);
+                if ($i != -1) {
+                    $notes = $structList->notes[$i]->deals;
+                    header('Content-Type: application/json');
+                    print(json_encode($notes));
                 } else {
                     http_response_code(403);
                 }
